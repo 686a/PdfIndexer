@@ -60,8 +60,8 @@ namespace WindowsFormsApp3
             set
             {
                 _WebViewIsDetached = value;
-                if (value) DetachButton.Text = "Attach";
-                else DetachButton.Text = "Detach";
+                if (value) DetachButton.Image = Properties.Resources.OpenInNewDownIcon;
+                else DetachButton.Image = Properties.Resources.OpenInNewIcon;
             }
         }
 
@@ -253,7 +253,7 @@ namespace WindowsFormsApp3
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void DetachButton_Click(object sender, EventArgs e)
         {
             if (WebViewIsDetached) AttachWebView();
             else DetachWebView();
