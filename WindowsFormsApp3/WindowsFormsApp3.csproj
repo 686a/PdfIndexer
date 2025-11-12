@@ -135,6 +135,9 @@
     <Compile Include="DuplicateManager\DuplicateItemControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="IconTextButtonControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="SearchItem.cs" />
     <Compile Include="DocumentGroup.cs" />
     <Compile Include="DuplicateManager\DuplicateManagerView.cs">
