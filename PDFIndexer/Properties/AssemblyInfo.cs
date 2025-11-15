@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PDFIndexer")]
-[assembly: AssemblyCopyright("Copyright ©  2025")]
+[assembly: AssemblyCopyright("Copyright 2025 Hyeong-Jong Choi (0x@686a.io)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
