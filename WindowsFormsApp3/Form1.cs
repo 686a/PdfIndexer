@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
+using WindowsFormsApp3.Journal;
 using static Lucene.Net.Util.Fst.Builder;
 using static Lucene.Net.Util.Packed.PackedInt32s;
 using Directory = System.IO.Directory;
@@ -29,7 +30,12 @@ namespace WindowsFormsApp3
 {
     public partial class Form1 : Form
     {
-        private readonly string basePath = @"E:\강의";
+        private static readonly Properties.Settings AppSettiongs = Properties.Settings.Default;
+
+        private string basePath
+        {
+            get { return AppSettiongs.BasePath; }
+        }
 
         private readonly List<string> pdfs = new List<string>();
 
@@ -69,6 +75,10 @@ namespace WindowsFormsApp3
 
         public Form1()
         {
+#if DEBUG
+            new DebugForm().Show();
+#endif
+
             indexer = new Indexer(basePath);
 
             InitializeComponent();
@@ -86,6 +96,7 @@ namespace WindowsFormsApp3
             duplicateManagerView = new DuplicateManagerView(indexer);
         }
 
+        #region 웹뷰 관련
         private void AttachWebView()
         {
             pdfWebView.TopLevel = false;
@@ -117,6 +128,24 @@ namespace WindowsFormsApp3
             }
         }
 
+        // 주어진 PDF 파일을 앱 내에서 염
+        // 직접 webview를 조작하여 open 시 잘못된 동작으로 PDF가 열리지 않음.
+        // 무조건 이 메소드를 이용해서 열어야 함.
+        private void OpenPDFInApp(SearchItemControl item)
+        {
+            FilenameLabel.Text = item.Name;
+
+            pdfWebView.OpenPDFInApp(item);
+        }
+
+        private void DetachButton_Click(object sender, EventArgs e)
+        {
+            if (WebViewIsDetached) AttachWebView();
+            else DetachWebView();
+        }
+        #endregion 웹뷰 관련
+
+        #region 인덱서 관련
         private void FindAllPdfFiles(string path, bool recursive = false)
         {
             var files = Directory.GetFiles(path);
@@ -151,7 +180,9 @@ namespace WindowsFormsApp3
 
             IsIndexing = false;
         }
+        #endregion 인덱서 관련
 
+        #region 검색 관련 이벤트
         private void QueryInputBox_TextChanged(object sender, EventArgs e)
         {
             // 검색 쿼리 입력 시 자동 검색
@@ -190,17 +221,9 @@ namespace WindowsFormsApp3
             SearchItemControl item = (SearchItemControl)sender;
             OpenPDFInApp(item);
         }
+        #endregion 검색 관련 이벤트
 
-        // 주어진 PDF 파일을 앱 내에서 염
-        // 직접 webview를 조작하여 open 시 잘못된 동작으로 PDF가 열리지 않음.
-        // 무조건 이 메소드를 이용해서 열어야 함.
-        private void OpenPDFInApp(SearchItemControl item)
-        {
-            FilenameLabel.Text = item.Name;
-
-            pdfWebView.OpenPDFInApp(item);
-        }
-
+        #region 인덱서 관련 이벤트
         private void IndexAllButton_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show(
@@ -215,14 +238,16 @@ namespace WindowsFormsApp3
             IndexAll();
         }
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 인덱서 정리
+            indexer.Dispose();
+        }
+        #endregion 인덱서 관련 이벤트
+
         private void OpenInNewWindowButton_Click(object sender, EventArgs e)
         {
             Process.Start("explorer.exe", pdfWebView.currentPdf.LocalPath.ToString());
-         }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            indexer.Dispose();
         }
 
         private async void button2_Click(object sender, EventArgs e)
@@ -263,13 +288,7 @@ namespace WindowsFormsApp3
             }
         }
 
-        private void DetachButton_Click(object sender, EventArgs e)
-        {
-            if (WebViewIsDetached) AttachWebView();
-            else DetachWebView();
-        }
-
-        private void button3_Click_1(object sender, EventArgs e)
+        private void DuplicateMangerButton_Click(object sender, EventArgs e)
         {
             duplicateManagerView.ShowDialog();
         }
