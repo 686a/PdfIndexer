@@ -180,6 +180,16 @@
     <Compile Include="PdfWebView.Designer.cs">
       <DependentUpon>PdfWebView.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupWizard\Phase.cs" />
+    <Compile Include="SetupWizard\Phases\ChoosePathPhase.cs" />
+    <Compile Include="SetupWizard\Phases\DonePhase.cs" />
+    <Compile Include="SetupWizard\Phases\WelcomePhase.cs" />
+    <Compile Include="SetupWizard\SetupWizardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetupWizard\SetupWizardForm.Designer.cs">
+      <DependentUpon>SetupWizardForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -204,6 +214,9 @@
     </Compile>
     <EmbeddedResource Include="PdfWebView.resx">
       <DependentUpon>PdfWebView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetupWizard\SetupWizardForm.resx">
+      <DependentUpon>SetupWizardForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

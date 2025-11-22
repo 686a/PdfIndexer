@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PDFIndexer.Journal;
+using PDFIndexer.SetupWizard;
 
 namespace PDFIndexer
 {
@@ -17,11 +18,26 @@ namespace PDFIndexer
         [STAThread]
         static void Main()
         {
+            /**
+             * 초기 실행 -> run setup wizard
+             * 기사용자 no or broken configuration -> run setup wizard
+             * 기사용자 -> 일반 실행
+             */
+
             SetupDefaultSettings();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            // 초기 실행 시 Setup wizard 실행
+            if (!AppSettiongs.DoneSetupWizard)
+            {
+                Application.Run(new SetupWizardForm());
+            }
+            else
+            {
+                Application.Run(new Form1());
+            }
         }
 
         // 설정 기본값 저장
