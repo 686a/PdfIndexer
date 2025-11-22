@@ -21,6 +21,10 @@ namespace PDFIndexer.SetupWizard
 
         public SetupWizardForm()
         {
+#if DEBUG
+            new DebugForm().Show();
+#endif
+
             InitializeComponent();
 
             Phases = new Phase[] {

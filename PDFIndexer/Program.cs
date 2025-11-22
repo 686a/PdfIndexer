@@ -18,6 +18,8 @@ namespace PDFIndexer
         [STAThread]
         static void Main()
         {
+            Logger.Write(JournalLevel.Info, "프로그램 진입점");
+
             /**
              * 초기 실행 -> run setup wizard
              * 기사용자 no or broken configuration -> run setup wizard
@@ -32,10 +34,12 @@ namespace PDFIndexer
             // 초기 실행 시 Setup wizard 실행
             if (!AppSettiongs.DoneSetupWizard)
             {
+                Logger.Write($"Settings.DoneSetupWizard : false --> Setup wizard 실행");
                 Application.Run(new SetupWizardForm());
             }
             else
             {
+                Logger.Write($"메인 UI 실행");
                 Application.Run(new Form1());
             }
         }
