@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PDFIndexer.Journal;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
+public delegate void ItemClick(string title, string path, int page);
+
 namespace PDFIndexer
 {
     internal partial class SearchItemControl : Button
@@ -14,8 +17,8 @@ namespace PDFIndexer
         public string Title { get; set; }
         public string AbsolutePath { get; set; }
         public string Path { get; set; }
-        public int Page { get; set; }
-        public int Matches { get; set; }
+        public int MatchPages { get; set; }
+        public int[] Pages { get; set; }
         public new FlowLayoutPanel Parent { get; set; }
 
         private bool IsLoad = false;
@@ -25,6 +28,12 @@ namespace PDFIndexer
         private Label pathLabel;
         private Label pageLabel;
         private Label matchesLabel;
+        private Button MoreButton;
+        private FlowLayoutPanel ResultLayout;
+
+        private bool Expanded = false;
+
+        public event ItemClick OnItemClick;
 
         public SearchItemControl()
         {
@@ -45,15 +54,16 @@ namespace PDFIndexer
             Width = Parent.ClientSize.Width;
         }
 
-        public SearchItemControl(string title, string absolutePath, string path, int page, int matches, FlowLayoutPanel parent)
+        public SearchItemControl(string title, string absolutePath, string path, int matchPages, DocumentGroup group, FlowLayoutPanel parent)
         {
             ApplyStyle();
 
             Title = title;
             AbsolutePath = absolutePath;
             Path = path;
-            Page = page;
-            Matches = matches;
+            MatchPages = matchPages;
+            Pages = group.Documents.Keys.ToArray();
+            Array.Sort(Pages);
             Parent = parent;
 
             ApplyParent(parent);
@@ -75,9 +85,21 @@ namespace PDFIndexer
 
             if (IsLoad)
             {
-                titleLabel.Location = new Point(8, Height / 2 - titleLabel.Height);
-                pathLabel.Location = new Point(8, Height / 2);
-                pageLabel.Location = new Point(titleLabel.Location.X + titleLabel.Width, titleLabel.Location.Y);
+                int baseHeight = Expanded ? 70 : Height;
+                //MaximumSize = new Size(ClientSize.Width - SystemInformation.VerticalScrollBarWidth, MaximumSize.Height);
+                //Width = ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
+
+                titleLabel.Location = new Point(32, baseHeight / 2 - titleLabel.Height);
+                pathLabel.Location = new Point(32, baseHeight / 2);
+
+                MoreButton.Location = new Point(0, 0);
+                ResultLayout.Location = new Point(0, 70);
+                ResultLayout.Width = Width;
+                var resultLayoutChild = ResultLayout.Controls[0];
+                if (resultLayoutChild != null)
+                {
+                    resultLayoutChild.Width = ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
+                }
             }
         }
 
@@ -119,40 +141,140 @@ namespace PDFIndexer
             PassthroughEvents(pathLabel);
             Controls.Add(pathLabel);
 
-            pageLabel = new Label();
-            pageLabel.Text = $"p{Page}";
-            pageLabel.AutoSize = true;
-            pageLabel.BackColor = Color.Transparent;
-            PassthroughEvents(pageLabel);
-            Controls.Add(pageLabel);
+            // 왼쪽 세부 내용 열기 버튼
+            MoreButton = new Button()
+            {
+                Text = "▶",
+                Width = 36,
+                Height = 70,
+                AutoSize = false,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+            };
+            MoreButton.FlatAppearance.BorderSize = 0;
+            MoreButton.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            MoreButton.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            PassthroughEvents(MoreButton, true);
+            Controls.Add(MoreButton);
+            MoreButton.Click += (sender, e) =>
+            {
+                Expand(!Expanded);
+            };
+
+            ResultLayout = new FlowLayoutPanel()
+            {
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                Location = new Point(0, 70),
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = true,
+                Height = 1,
+                AutoSize = true,
+            };
+            Controls.Add(ResultLayout);
+
+            for (int i = 0; i < Math.Min(5, Pages.Length); i++)
+            {
+                var page = Pages[i];
+                ResultLayout.Controls.Add(CreatePageButton(page));
+            }
+
+            // Add show more button
+            if (Pages.Length > 5)
+            {
+                var showAllButton = new Button()
+                {
+                    Text = $"결과 {Pages.Length}개 모두 보기",
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                    BackColor = base.BackColor
+                };
+                showAllButton.Click += (sender, e) =>
+                {
+                    ResultLayout.Controls.Remove(showAllButton);
+
+                    for (int i = 5; i < Pages.Length; i++)
+                    {
+                        var page = Pages[i];
+                        ResultLayout.Controls.Add(CreatePageButton(page));
+                    }
+
+                    Height = 70 + ResultLayout.Height;
+                };
+                ResultLayout.Controls.Add(showAllButton);
+            }
 
             IsLoad = true;
         }
 
-        private void PassthroughEvents(Control control)
+        private Button CreatePageButton(int page)
         {
-            control.MouseHover += (_, e) => base.OnMouseHover(e);
-            control.MouseEnter += (_, e) => base.OnMouseEnter(e);
-            control.MouseLeave += (_, e) => base.OnMouseLeave(e);
-            control.MouseMove += (_, e) => base.OnMouseMove(e);
-            control.MouseClick += (s, e) => base.OnMouseClick(e);
-            control.MouseDoubleClick += (s, e) => base.OnMouseDoubleClick(e);
-            control.MouseDown += (s, e) => base.OnMouseDown(e);
-            control.MouseUp += (s, e) => base.OnMouseUp(e);
-            control.GotFocus += (s, e) => base.OnGotFocus(e);
-            control.LostFocus += (s, e) => base.OnLostFocus(e);
+            var pageButton = new Button()
+            {
+                FlatStyle = FlatStyle.Flat,
+                Text = $"{page} page",
+                AutoSize = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Margin = Padding.Empty,
+                Padding = new Padding(16, 0, 16, 0),
+            };
+            pageButton.FlatAppearance.BorderSize = 0;
+
+            pageButton.Click += (sender, e) =>
+            {
+                OnItemClick(Title, AbsolutePath, page);
+            };
+
+            return pageButton;
+        }
+
+        private void PassthroughEvents(Control control, bool withoutInput = false)
+        {
+            control.MouseHover += (_, e) => OnMouseHover(e);
+            control.MouseEnter += (_, e) => OnMouseEnter(e);
+            control.MouseLeave += (_, e) => OnMouseLeave(e);
+            control.MouseMove += (_, e) => OnMouseMove(e);
+            control.GotFocus += (s, e) => OnGotFocus(e);
+            control.LostFocus += (s, e) => OnLostFocus(e);
+
+            if (!withoutInput)
+            {
+                control.MouseClick += (s, e) => OnMouseClick(e);
+                control.MouseDoubleClick += (s, e) => OnMouseDoubleClick(e);
+                control.MouseDown += (s, e) => OnMouseDown(e);
+                control.MouseUp += (s, e) => OnMouseUp(e);
+                control.MouseClick += (s, e) => OnMouseClick(e);
+            }
         }
 
         public override string Text => $"\n\n\n\n";
 
         public override string ToString()
         {
-            return $"{Title} - \n{Page} page";
+            return $"{Title} - \n{MatchPages} page";
         }
 
         protected override void OnClick(EventArgs e)
         {
             base.OnClick(e);
+
+            if (!Expanded)
+            {
+                Expand(true);
+
+                OnItemClick(Title, AbsolutePath, Pages[0]);
+            } else
+            {
+                Expand(false);
+            }
+        }
+
+        private void Expand(bool expand)
+        {
+            Expanded = expand;
+            Height = expand ? 70 + ResultLayout.Height : 70;
+            MoreButton.Text = expand ? "▼" : "▶";
+            BackColor = expand ? Color.FromArgb(255, 220, 220, 220) : Color.Transparent;
         }
     }
 }

@@ -24,9 +24,9 @@ namespace PDFIndexer
         // 주어진 PDF 파일을 앱 내에서 염
         // 직접 webview를 조작하여 open 시 잘못된 동작으로 PDF가 열리지 않음.
         // 무조건 이 메소드를 이용해서 열어야 함.
-        internal void OpenPDFInApp(SearchItemControl item)
+        internal void OpenPDFInApp(string path, int page)
         {
-            currentPdf = new Uri($"file://{item.AbsolutePath}#page={item.Page}");
+            currentPdf = new Uri($"file://{path}#page={page}");
             webView.Source = currentPdf;
             webView.Visible = true;
         }

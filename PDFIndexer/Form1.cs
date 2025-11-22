@@ -131,11 +131,13 @@ namespace PDFIndexer
         // 주어진 PDF 파일을 앱 내에서 염
         // 직접 webview를 조작하여 open 시 잘못된 동작으로 PDF가 열리지 않음.
         // 무조건 이 메소드를 이용해서 열어야 함.
-        private void OpenPDFInApp(SearchItemControl item)
+        private void OpenPDFInApp(string title, string path, int page)
         {
-            FilenameLabel.Text = item.Name;
+            noFileLabel.Visible = false;
 
-            pdfWebView.OpenPDFInApp(item);
+            FilenameLabel.Text = title;
+
+            pdfWebView.OpenPDFInApp(path, page);
         }
 
         private void DetachButton_Click(object sender, EventArgs e)
@@ -188,38 +190,23 @@ namespace PDFIndexer
             // 검색 쿼리 입력 시 자동 검색
             flowLayoutPanel1.Controls.Clear();
 
-            var topDocs = indexer.SearchQuery(QueryInputBox.Text, 10);
+var query = QueryInputBox.Text;
+            var topDocs = indexer.SearchQuery(query, 50);
             if (topDocs == null) return;
 
-            List<Document> docs = new List<Document>();
-            for (int i = 0; i < topDocs.ScoreDocs.Length; i++)
+            var groups = Indexer.GroupDocuments(indexer, topDocs.ScoreDocs);
+            foreach (var group in groups)
             {
-                docs.Add(indexer.SearchDocument(topDocs.ScoreDocs[i].Doc));
-                //string title = doc.Get("title");
-                //string absolutePath = doc.Get("path");
-                //string path = absolutePath.Replace($"{basePath}\\", "");
-                //int page = int.Parse(doc.Get("page"));
-
-                //var searchItem = new SearchItem(title, absolutePath, path, page, flowLayoutPanel1);
-                //searchItem.Click += SearchItem_Click;
-                //flowLayoutPanel1.Controls.Add(searchItem);
-            }
-
-            DocumentGroup[] group = Indexer.GroupDocuments(docs.ToArray());
-            foreach (var item in group)
-            {
-                string relativePath = item.Path.Replace($"{basePath}\\", "");
-                var searchItem = new SearchItemControl(item.Title, item.Path, relativePath, item.Page, item.Matches, flowLayoutPanel1);
-                searchItem.Click += SearchItem_Click;
+                string relativePath = group.Path.Replace($"{basePath}\\", "").Replace($"\\{group.Title}.pdf", "");
+                var searchItem = new SearchItemControl(group.Title, group.Path, relativePath, group.MatchPages, group, flowLayoutPanel1);
+                searchItem.OnItemClick += SearchItem_OnItemClick;
                 flowLayoutPanel1.Controls.Add(searchItem);
             }
         }
 
-        private void SearchItem_Click(object sender, EventArgs e)
+        private void SearchItem_OnItemClick(string title, string path, int page)
         {
-            // 리스트 박스 선택 시 해당 파일 오픈
-            SearchItemControl item = (SearchItemControl)sender;
-            OpenPDFInApp(item);
+                        OpenPDFInApp(title, path, page);
         }
         #endregion 검색 관련 이벤트
 

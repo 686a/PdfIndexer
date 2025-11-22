@@ -200,9 +200,10 @@ namespace PDFIndexer
 
                         // TODO: Cron task에 이미지 OCR
 
-                        Logger.Write($"IndexPdfs - Index done: {path} {page.Number}/{pages.Count()} page");
-                        writer.AddDocument(doc);
+                                                writer.AddDocument(doc);
                     }
+
+                    // Logger.Write($"IndexPdfs - Index done: {path} with {pages.Count()} pages");
                 }
             }
 
@@ -235,32 +236,41 @@ namespace PDFIndexer
             return searcher.Doc(doc);
         }
 
-        public static DocumentGroup[] GroupDocuments(Document[] docs)
+        public static DocumentGroup[] GroupDocuments(Indexer indexer, ScoreDoc[] scoreDocs)
         {
+            // 경로를 기준으로 그룹
             Dictionary<string, DocumentGroup> result = new Dictionary<string, DocumentGroup>();
-            //List<DocumentGroup> result = new List<DocumentGroup>();
 
-            foreach (var doc in docs)
+            foreach (var scoreDoc in scoreDocs)
             {
+                Document doc = indexer.SearchDocument(scoreDoc.Doc);
                 string path = doc.Get("path");
+                int page = int.Parse(doc.Get("page"));
+
                 if (result.ContainsKey(path))
                 {
                     if (result.TryGetValue(path, out DocumentGroup group))
                     {
                         result.Remove(path);
-                        group.Matches++;
+                        group.Add(page, scoreDoc);
                         result.Add(path, group);
                     }
                 }
                 else
                 {
                     string title = doc.Get("title");
-                    int page = int.Parse(doc.Get("page"));
-                    result.Add(path, new DocumentGroup(title, path, page));
+
+                    var group = new DocumentGroup(title, path);
+                    group.Add(page, scoreDoc);
+
+                    result.Add(path, group);
                 }
             }
 
-            return result.Values.ToArray();
+            var resultArray = result.Values.ToArray();
+            Array.Sort(resultArray, (a, b) => b.TotalScore.CompareTo(a.TotalScore));
+
+            return resultArray;
         }
 
         private static bool IsMissingPdf(Indexer indexer, string pdf, bool strict = false)

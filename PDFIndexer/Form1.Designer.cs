@@ -42,9 +42,12 @@
             this.button4 = new System.Windows.Forms.Button();
             this.DetachButton = new System.Windows.Forms.Button();
             this.OpenInNewWindowButton = new System.Windows.Forms.Button();
+            this.noFileLabel = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.DuplicateMangerButton = new PDFIndexer.IconTextButtonControl();
             this.WebViewVirtualPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // QueryInputBox
@@ -70,10 +73,10 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(79, 743);
+            this.progressBar1.Location = new System.Drawing.Point(73, 6);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(535, 29);
+            this.progressBar1.Size = new System.Drawing.Size(247, 21);
             this.progressBar1.TabIndex = 5;
             // 
             // FilenameLabel
@@ -98,9 +101,9 @@
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(9, 743);
+            this.label1.Location = new System.Drawing.Point(3, 6);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 29);
+            this.label1.Size = new System.Drawing.Size(64, 21);
             this.label1.TabIndex = 10;
             this.label1.Text = "Not Ready";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -120,9 +123,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(13, 15);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(57, 15);
+            this.label2.Size = new System.Drawing.Size(207, 30);
             this.label2.TabIndex = 0;
-            this.label2.Text = "WebView";
+            this.label2.Text = "WebView Proxy\r\n이 부분에 PdfWebView가 표시됩니다";
             // 
             // flowLayoutPanel1
             // 
@@ -182,6 +185,25 @@
             this.OpenInNewWindowButton.TabIndex = 18;
             this.OpenInNewWindowButton.UseVisualStyleBackColor = true;
             // 
+            // noFileLabel
+            // 
+            this.noFileLabel.AutoSize = true;
+            this.noFileLabel.Location = new System.Drawing.Point(750, 350);
+            this.noFileLabel.Name = "noFileLabel";
+            this.noFileLabel.Size = new System.Drawing.Size(135, 15);
+            this.noFileLabel.TabIndex = 23;
+            this.noFileLabel.Text = "선택된 파일이 없습니다";
+            this.noFileLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.progressBar1);
+            this.panel1.Location = new System.Drawing.Point(12, 738);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(334, 32);
+            this.panel1.TabIndex = 24;
+            // 
             // DuplicateMangerButton
             // 
             this.DuplicateMangerButton.Content = "중복 관리자";
@@ -199,6 +221,8 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(1249, 781);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.noFileLabel);
             this.Controls.Add(this.DuplicateMangerButton);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button4);
@@ -208,9 +232,7 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.WebViewVirtualPanel);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.FilenameLabel);
-            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.IndexAllButton);
             this.Controls.Add(this.QueryInputBox);
             this.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -222,6 +244,7 @@
             this.WebViewVirtualPanel.ResumeLayout(false);
             this.WebViewVirtualPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -243,6 +266,8 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.PictureBox pictureBox1;
         private IconTextButtonControl DuplicateMangerButton;
+        private System.Windows.Forms.Label noFileLabel;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
