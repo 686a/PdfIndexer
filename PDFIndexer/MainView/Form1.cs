@@ -83,9 +83,6 @@ namespace PDFIndexer
 
             InitializeComponent();
 
-            MainForm mainform = new MainForm();
-            mainform.Show();
-
             //BackColor = Color.White;
             //TransparencyKey = Color.White;
 
